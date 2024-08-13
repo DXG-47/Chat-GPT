@@ -6,3 +6,48 @@ Prompt 3:
 using the mass of helium nucleus, and the speeds of the gas molecules, have label that outputs the temperature of the box at any instant. Use statistical mechanics to calculate the temperature.
 Prompt 4:
 update above code to add the label in html below the gas container. To the right of the gas container have a small box that explains the kinetic theory of gases and have the relevant equation below it
+
+
+------------------------------------------------------------------------------------
+CODE:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2D Gas Molecule Simulation</title>
+    <style>
+        body { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        canvas { border: 1px solid black; }
+        #container { display: flex; }
+        #temp { margin-top: 10px; font-size: 18px; }
+        #info { margin-left: 20px; padding: 10px; border: 1px solid black; background: #f9f9f9; max-width: 300px; }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <canvas id="simulationCanvas" width="800" height="600"></canvas>
+        <div id="info">
+            <h3>Kinetic Theory of Gases</h3>
+            <p>Temperature \( T \) is given by:</p>
+            <p>\[ T = \frac{2 \text{KE}_{\text{avg}}}{3 k_B} \]</p>
+        </div>
+    </div>
+    <div id="temp">Temperature: Calculating...</div>
+    <script>
+        const canvas = document.getElementById('simulationCanvas'), ctx = canvas.getContext('2d');
+        const mols = Array.from({length: 50}, () => ({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 4, vy: (Math.random() - 0.5) * 4 }));
+        const m = 4.002602e-27, k_B = 1.38e-23, r = 5, vdW = 10;
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            mols.forEach(mol => { mol.x += mol.vx; mol.y += mol.vy; if (mol.x < r || mol.x > canvas.width - r) mol.vx *= -1; if (mol.y < r || mol.y > canvas.height - r) mol.vy *= -1; ctx.beginPath(); ctx.arc(mol.x, mol.y, r, 0, 2 * Math.PI); ctx.fill(); });
+            mols.forEach((m1, i) => mols.slice(i + 1).forEach(m2 => { const dx = m1.x - m2.x, dy = m1.y - m2.y, d = Math.sqrt(dx**2 + dy**2); if (d < 2 * r + vdW) { const o = (2 * r + vdW - d) / 2; m1.vx -= o * dx / d; m1.vy -= o * dy / d; m2.vx += o * dx / d; m2.vy += o * dy / d; } }));
+            const T = 2 * mols.reduce((a, mol) => a + 0.5 * m * (mol.vx**2 + mol.vy**2), 0) / (mols.length * 3 * k_B);
+            document.getElementById('temp').textContent = `Temperature: ${T.toFixed(2)} K`;
+            requestAnimationFrame(update);
+        }
+        update();
+    </script>
+</body>
+</html>
+
